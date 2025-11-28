@@ -1,0 +1,12 @@
+Network:
+  laravel-docker:
+services:
+  server:
+    build:
+      context: .
+      dockerfile: dockerfiles/nginx.dockerfile
+  php:
+  mysql:
+  phpmyadmin:
+  composer:
+  artisan:
