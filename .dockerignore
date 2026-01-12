@@ -1,0 +1,12 @@
+.git
+.gitignore
+node_modules
+vendor
+src/node_modules
+src/vendor
+src/storage
+src/bootstrap/cache
+mysql_data
+.env
+mysql/.env
+*.log
