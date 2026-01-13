@@ -1,4 +1,6 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.3.3-fpm-alpine AS base
+
+ARG INSTALL_XDEBUG=false
 
 WORKDIR /var/www/html
 
@@ -22,10 +24,18 @@ RUN apk add --no-cache --virtual .build-deps \
         opcache \
         exif \
         zip && \
-    pecl install redis && \
+    if [ "$INSTALL_XDEBUG" = "true" ]; then \
+        pecl install xdebug-3.3.2 && \
+        docker-php-ext-enable xdebug && \
+        printf "zend_extension=xdebug.so\nxdebug.mode=debug,develop\nxdebug.start_with_request=yes\nxdebug.discover_client_host=true\nxdebug.client_host=host.docker.internal\nxdebug.log_level=0\n" > /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
+    fi && \
+    pecl install redis-6.0.2 && \
     docker-php-ext-enable redis && \
     apk del .build-deps && \
     rm -rf /tmp/pear /usr/src/php*
+
+# Opcache y ajustes de PHP
+COPY dockerfiles/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Usuario no root (Laravel-friendly)
 ARG UID=1000
@@ -34,5 +44,11 @@ RUN addgroup -g ${GID} laravel && \
     adduser -G laravel -g laravel -s /bin/sh -D -u ${UID} laravel && \
     chown -R laravel:laravel /var/www/html
 
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD php-fpm -t || exit 1
+
 USER laravel
 
+FROM base AS app
+COPY --chown=laravel:laravel ./src /var/www/html
+WORKDIR /var/www/html
+USER laravel

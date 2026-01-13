@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  server:
+    profiles: ["prod"]
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+  php:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      target: app
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        INSTALL_XDEBUG: "false"
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+    restart: unless-stopped
+
+  mysql:
+    profiles: ["prod"]
+    restart: unless-stopped

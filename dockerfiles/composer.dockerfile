@@ -1,4 +1,4 @@
-FROM composer:latest
+FROM composer:2.7.2
 ARG UID=1000
 ARG GID=1000
 RUN addgroup -g ${GID} laravel && \
