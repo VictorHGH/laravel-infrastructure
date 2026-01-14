@@ -71,42 +71,6 @@ Incluye:
 - Espera a que termine la sincronización de `mysql_dev_data/` (Syncthing/Drive/Dropbox/rsync).
 - En la otra máquina: levantar de nuevo (`docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d`).
 
-## Proxy frontal (Traefik) opcional
-Si usas Traefik como proxy único en 80/443:
-- Levanta Traefik con `traefik.docker-compose.yml` y conéctalo a la red `laravel-docker`.
-- Añade labels al servicio `server` en `docker-compose.yml` para tu dominio (router, entrypoint y puerto 8080 del servicio). Con Traefik puedes omitir publicar puertos en `server`.
-
-Ejemplo mínimo de Traefik (compose separado):
-```yaml
-services:
-  traefik:
-    image: traefik:${TRAEFIK_IMAGE_TAG}
-    command:
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      # Descomenta y configura para Let’s Encrypt
-      # - "--certificatesresolvers.le.acme.httpchallenge=true"
-      # - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
-      # - "--certificatesresolvers.le.acme.email=tu-correo"
-      # - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
-    networks:
-      - laravel-docker
-networks:
-  laravel-docker:
-    external: true
-```
-Levantar Traefik:
-```bash
-docker compose -f traefik.docker-compose.yml up -d
-```
-
 ## Apertura de puertos (seguridad)
 - Asegúrate de abrir los puertos públicos que uses (`WEB_PORT` y `PMA_PORT`) en el firewall del host.
 - Ejemplo firewalld (RHEL/CentOS/Fedora):
@@ -116,10 +80,6 @@ docker compose -f traefik.docker-compose.yml up -d
   sudo firewall-cmd --reload
   ```
 - En otras distros, usa el equivalente (ufw/iptables) o la herramienta de tu proveedor cloud.
-
-## Cuando haya dominio + TLS
-- Con proxy frontal: deja el contenedor en 8080 y configura el router (labels) al dominio en Traefik/Caddy/Nginx.
-- Sin proxy: cambia el mapeo a `80:8080` y gestiona certs en Nginx interno (no recomendado para múltiples proyectos).
 
 ## Parar y limpiar
 - Detener: `docker compose down`
