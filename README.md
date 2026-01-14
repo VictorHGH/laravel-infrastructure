@@ -27,14 +27,12 @@ Atajos opcionales
 - `src/`: código de la app (no se versiona aquí); en dev se monta, en prod se copia en el build base. Nginx solo copia `public/`.
 
 ## Variables de entorno mínimas
-- Crea `mysql/.env` (no se versiona):
+- Usa las plantillas versionadas y ajusta credenciales en el servidor:
+  ```bash
+  cp mysql/.env.example mysql/.env
+  cp src/.env.example src/.env
   ```
-  MYSQL_ROOT_PASSWORD=root.pa55
-  MYSQL_DATABASE=laravel
-  MYSQL_USER=laravel
-  MYSQL_PASSWORD=laravel.pa55
-  ```
-- Prepara el `.env` de Laravel en `src/` (APP_KEY, DB_*, etc.).
+  Luego rellena claves/DB y genera `APP_KEY` (`php artisan key:generate`).
 - Usa tus UID/GID para permisos correctos: `UID=$(id -u) GID=$(id -g)`.
 
 ## Desarrollo
@@ -64,6 +62,14 @@ Incluye:
 - MySQL con volumen nombrado `mysql_data` (persistente en el host).
 - Xdebug deshabilitado, `APP_ENV=production`, `APP_DEBUG=false`.
 - Tags de imágenes y puertos vienen de `.env` (puedes sobreescribirlos al exportar variables).
+
+## Despliegue con rsync
+- Usa el archivo `exclude-for-prod.txt` para excluir dev/caches/secretos al copiar: 
+  ```bash
+  rsync -avz --exclude-from='exclude-for-prod.txt' /path/local/ /ruta/en/servidor/
+  ```
+- En el servidor copia las plantillas: `cp mysql/.env.example mysql/.env` y `cp src/.env.example src/.env`, luego ajusta credenciales y genera `APP_KEY`.
+- No excluyas `src/vendor/` en prod: el PHP Dockerfile no ejecuta `composer install`.
 
 ## Operación segura con carpeta sincronizada (`mysql_dev_data`)
 - Antes de cambiar de máquina o suspender: `docker compose down` (o `dcdev down`).
