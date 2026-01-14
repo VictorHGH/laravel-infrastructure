@@ -21,6 +21,7 @@ Atajos opcionales
 - Puertos libres: 8080 (app por defecto) y 8090 solo para phpMyAdmin en dev. Si quieres otros puertos públicos, ajusta `WEB_PORT` (y `PMA_PORT` en dev).
 - El directorio `mysql_dev_data/` debe permanecer fuera de git; ya está en `.gitignore`/`.dockerignore`. También se ignora `src/` y `mysql_data/` en git (solo infra aquí).
 - El archivo raíz `.env` (versionado) define `PROJECT_NAME`/`COMPOSE_PROJECT_NAME`, tags/base images y puertos por defecto. Los recursos se nombran como `${PROJECT_NAME}-net` y `${PROJECT_NAME}-mysql-data`.
+- En prod debe existir `src/public` antes de `docker compose build` (asegura assets/entrypoint de Nginx).
 
 ## Estructura rápida
 - `docker-compose.yml`: base común (nginx + php-fpm + MySQL). Código empaquetado (`target: app`), Xdebug apagado, `APP_ENV=production`. Puerto configurable con `WEB_PORT` (app). MySQL usa volumen nombrado `${PROJECT_NAME}-mysql-data`. Red nombrada `${PROJECT_NAME}-net`. Imágenes basadas en tags de `.env`.
