@@ -4,19 +4,34 @@
 .DS_Store
 *.log
 
+# Infra dev / plantilla
 docker-compose.dev.yml
 docker-aliases.zsh
 proyecto.txt
+treecat.py
+generar_proyeecto_txt.sh
+
+# (Opcional) docs
 README.md
 
+# (Opcional) archivos de repo
+.dockerignore
+.gitignore
+
+# Datos locales (no subir)
 mysql_dev_data/
 mysql_data/
 
+# Secretos (no subir)
 mysql/.env
 src/.env
-src/.env.*
+src/.env.local
+src/.env.production
+src/.env.staging
+src/.env.testing
 src/auth.json
 
+# Frontend / caches (no subir)
 src/node_modules/
 src/.npm/
 src/.yarn/
@@ -24,10 +39,12 @@ src/.pnpm-store/
 src/.cache/
 src/.vite/
 
+# Laravel runtime (mejor no sobreescribir en deploy)
 src/bootstrap/cache/
-src/storage/logs/
-src/storage/framework/
+src/storage/
 
+# Test / tooling (no necesario en prod)
 src/tests/
 src/.phpunit.result.cache
 src/phpunit.xml
+
