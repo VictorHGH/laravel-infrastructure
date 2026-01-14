@@ -29,6 +29,6 @@ alias dcprod='COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml" docker compose'
 
 # Ejemplos:
 #  Subir dev:    dcdev up -d --build
-#  Composer:     dcdev run --rm composer install
+#  Composer:     dcdev composer install
 #  Artisan:      dcdev exec php php artisan migrate
 #  Subir prod:   dcprod up -d --build

@@ -13,7 +13,7 @@ Atajos opcionales
 - Carga los aliases en cada sesión de shell (no se instalan globalmente): `source ./docker-aliases.zsh` desde la raíz del proyecto. Si estás fuera del directorio, usa la ruta absoluta al script.
 - Esto define `dcdev` (dev) y `dcprod` (prod/staging) sin perfiles ni archivos extra.
 - Ejemplos rápidos:
-  - Dev: `dcdev up -d --build`, `dcdev run --rm composer install`, `dcdev exec php php artisan migrate`
+  - Dev: `dcdev up -d --build`, `dcdev composer install`, `dcdev exec php php artisan migrate`
   - Prod/Staging: `dcprod up -d --build`
 
 ## Requisitos

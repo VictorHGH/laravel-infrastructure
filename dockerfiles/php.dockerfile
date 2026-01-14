@@ -54,7 +54,7 @@ USER laravel
 
 FROM composer:${COMPOSER_IMAGE_TAG} AS vendor
 WORKDIR /app
-COPY ./src/composer.json ./src/composer.lock ./
+COPY ./src/ ./
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
 FROM base AS app
