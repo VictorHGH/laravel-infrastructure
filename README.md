@@ -5,7 +5,9 @@ Base de infraestructura Docker para proyectos Laravel (este repo no versiona `./
 
 ## Comandos rápidos
 - Desarrollo: `UID=$(id -u) GID=$(id -g) docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build`
-- Producción/Staging (sin dominio): `UID=$(id -u) GID=$(id -g) WEB_PORT=8081 docker compose up -d --build` (`WEB_PORT` es opcional; por defecto expone 8080).
+  - phpMyAdmin: `http://localhost:${PMA_PORT:-8090}`
+- Producción/Staging (sin dominio): `UID=$(id -u) GID=$(id -g) WEB_PORT=8081 docker compose up -d --build`
+  - Acceso app: `http://IP:${WEB_PORT:-8080}`
 
 Atajos opcionales
 - Carga los aliases en cada sesión de shell (no se instalan globalmente): `source ./docker-aliases.zsh` desde la raíz del proyecto. Si estás fuera del directorio, usa la ruta absoluta al script.
@@ -22,7 +24,7 @@ Atajos opcionales
 
 ## Estructura rápida
 - `docker-compose.yml`: base común (nginx + php-fpm + MySQL). Código empaquetado (`target: app`), Xdebug apagado, `APP_ENV=production`. Puerto configurable con `WEB_PORT` (app). MySQL usa volumen nombrado `mysql_data`. Imágenes basadas en tags de `.env`.
-- `docker-compose.dev.yml`: override dev (montajes de código, Xdebug, phpMyAdmin con restart relajado, servicio composer con imagen oficial, opcache ajustado). MySQL monta `./mysql_dev_data` para que los datos sean portátiles.
+- `docker-compose.dev.yml`: override dev (montajes de código, Xdebug, phpMyAdmin con restart relajado y `PMA_PORT`, servicio composer con imagen oficial, opcache ajustado). MySQL monta `./mysql_dev_data` para que los datos sean portátiles.
 - `dockerfiles/`: nginx (copia config y `public/`), php (multi-stage con Xdebug opcional). Composer usa imagen oficial, no Dockerfile propio. Base images parametrizadas vía args/`.env`.
 - `src/`: código de la app (no se versiona aquí); en dev se monta, en prod se copia en el build base. Nginx solo copia `public/`.
 
@@ -32,7 +34,7 @@ Atajos opcionales
   cp mysql/.env.example mysql/.env
   cp src/.env.example src/.env
   ```
-  Luego rellena claves/DB y genera `APP_KEY` (`php artisan key:generate`).
+  Luego rellena claves/DB y genera `APP_KEY` (`php artisan key:generate`). Si usas rsync para desplegar, añade `--exclude-from='exclude-for-prod.txt'`.
 - Usa tus UID/GID para permisos correctos: `UID=$(id -u) GID=$(id -g)`.
 
 ## Desarrollo
@@ -69,7 +71,7 @@ Incluye:
   rsync -avz --exclude-from='exclude-for-prod.txt' /path/local/ /ruta/en/servidor/
   ```
 - En el servidor copia las plantillas: `cp mysql/.env.example mysql/.env` y `cp src/.env.example src/.env`, luego ajusta credenciales y genera `APP_KEY`.
-- No excluyas `src/vendor/` en prod: el PHP Dockerfile no ejecuta `composer install`.
+- No excluyas `src/vendor/` en prod: el PHP Dockerfile no ejecuta `composer install` (debe viajar en el rsync si ya está construido).
 
 ## Operación segura con carpeta sincronizada (`mysql_dev_data`)
 - Antes de cambiar de máquina o suspender: `docker compose down` (o `dcdev down`).
