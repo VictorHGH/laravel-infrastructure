@@ -54,3 +54,8 @@ services:
   mysql:
     volumes:
       - ./mysql_dev_data:/var/lib/mysql
+
+networks:
+  laravel-docker:
+    external: true
+

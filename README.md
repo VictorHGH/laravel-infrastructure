@@ -6,6 +6,7 @@ Base de infraestructura Docker para proyectos Laravel (este repo no versiona `./
 ## Comandos rápidos
 - Desarrollo: `UID=$(id -u) GID=$(id -g) docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build`
   - phpMyAdmin: `http://localhost:${PMA_PORT:-8090}`
+  - Si es la primera vez: `docker network create laravel-docker`
 - Producción/Staging (sin dominio): `UID=$(id -u) GID=$(id -g) WEB_PORT=8081 docker compose up -d --build`
   - Acceso app: `http://IP:${WEB_PORT:-8080}`
 
@@ -24,7 +25,7 @@ Atajos opcionales
 
 ## Estructura rápida
 - `docker-compose.yml`: base común (nginx + php-fpm + MySQL). Código empaquetado (`target: app`), Xdebug apagado, `APP_ENV=production`. Puerto configurable con `WEB_PORT` (app). MySQL usa volumen nombrado `mysql_data`. Imágenes basadas en tags de `.env`.
-- `docker-compose.dev.yml`: override dev (montajes de código, Xdebug, phpMyAdmin con restart relajado y `PMA_PORT`, servicio composer con imagen oficial, opcache ajustado). MySQL monta `./mysql_dev_data` para que los datos sean portátiles.
+- `docker-compose.dev.yml`: override dev (montajes de código, Xdebug, phpMyAdmin con restart relajado y `PMA_PORT`, servicio composer con imagen oficial, opcache ajustado). MySQL monta `./mysql_dev_data` para que los datos sean portátiles. Declara `networks.laravel-docker` (externa) para que funcione aunque no cargues el base.
 - `dockerfiles/`: nginx (copia config y `public/`), php (multi-stage con Xdebug opcional). Composer usa imagen oficial, no Dockerfile propio. Base images parametrizadas vía args/`.env`.
 - `src/`: código de la app (no se versiona aquí); en dev se monta, en prod se copia en el build base. Nginx solo copia `public/`.
 
@@ -34,7 +35,7 @@ Atajos opcionales
   cp mysql/.env.example mysql/.env
   cp src/.env.example src/.env
   ```
-  Luego rellena claves/DB y genera `APP_KEY` (`php artisan key:generate`). Si usas rsync para desplegar, añade `--exclude-from='exclude-for-prod.txt'`.
+  Luego rellena claves/DB y genera `APP_KEY` (`php artisan key:generate`). Si usas rsync para desplegar, añade `--exclude-from='exclude-for-prod.txt'` y asegúrate de crear la red: `docker network create laravel-docker` (solo la primera vez).
 - Usa tus UID/GID para permisos correctos: `UID=$(id -u) GID=$(id -g)`.
 
 ## Desarrollo
