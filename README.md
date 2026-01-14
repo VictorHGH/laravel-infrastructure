@@ -55,9 +55,9 @@ Comandos útiles (dev):
   - `dcdev composer create-project laravel/laravel .`
   - `dcdev exec php php artisan key:generate`
   - `dcdev exec php php artisan migrate`
-- Dependencias puntuales: `docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm composer install`
-- APP_KEY: `docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php php artisan key:generate`
-- Migraciones: `docker compose -f docker-compose.yml -f docker-compose.dev.yml exec php php artisan migrate`
+- Dependencias puntuales: `dcdev composer install`
+- APP_KEY: `dcdev exec php php artisan key:generate`
+- Migraciones: `dcdev exec php php artisan migrate`
 
 ## Producción / Staging sin dominio
 ```bash
@@ -70,6 +70,7 @@ Incluye:
 - MySQL con volumen nombrado `mysql_data` (persistente en el host).
 - Xdebug deshabilitado, `APP_ENV=production`, `APP_DEBUG=false`.
 - Tags de imágenes y puertos vienen de `.env` (puedes sobreescribirlos al exportar variables).
+- Nota: antes de `dcprod up -d --build` asegúrate de que existan `src/composer.json` (y preferiblemente `src/composer.lock`); el build genera `vendor/` dentro de la imagen.
 
 ## Despliegue con rsync
 - Usa el archivo `exclude-for-prod.txt` para excluir dev/caches/secretos al copiar: 
@@ -78,7 +79,7 @@ Incluye:
   ```
 - En el servidor copia las plantillas: `cp mysql/.env.example mysql/.env` y `cp src/.env.example src/.env`, luego ajusta credenciales y genera `APP_KEY`.
 - En prod, `vendor` se genera en el build (stage vendor con `composer install --no-dev`); no es necesario subir `src/vendor/` por rsync.
-- Asegúrate de incluir `src/public` en el rsync; Nginx lo copia en la imagen.
+- Asegúrate de incluir `src/public` en el rsync; Nginx lo copia en la imagen. No excluyas `src/public/` en `exclude-for-prod.txt`.
 
 ## Operación segura con carpeta sincronizada (`mysql_dev_data`)
 - Antes de cambiar de máquina o suspender: `docker compose down` (o `dcdev down`).
