@@ -1,6 +1,9 @@
-FROM php:8.3.3-fpm-alpine AS base
+ARG PHP_BASE_IMAGE=php:8.3.3-fpm-alpine
+FROM ${PHP_BASE_IMAGE} AS base
 
 ARG INSTALL_XDEBUG=false
+ARG XDEBUG_VERSION=3.3.2
+ARG REDIS_PECL_VERSION=6.0.2
 
 WORKDIR /var/www/html
 
@@ -25,11 +28,11 @@ RUN apk add --no-cache --virtual .build-deps \
         exif \
         zip && \
     if [ "$INSTALL_XDEBUG" = "true" ]; then \
-        pecl install xdebug-3.3.2 && \
+        pecl install xdebug-${XDEBUG_VERSION} && \
         docker-php-ext-enable xdebug && \
         printf "zend_extension=xdebug.so\nxdebug.mode=debug,develop\nxdebug.start_with_request=yes\nxdebug.discover_client_host=true\nxdebug.client_host=host.docker.internal\nxdebug.log_level=0\n" > /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
     fi && \
-    pecl install redis-6.0.2 && \
+    pecl install redis-${REDIS_PECL_VERSION} && \
     docker-php-ext-enable redis && \
     apk del .build-deps && \
     rm -rf /tmp/pear /usr/src/php*

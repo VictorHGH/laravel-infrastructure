@@ -1,0 +1,4 @@
+src/
+mysql_data/
+mysql/.env
+mysql_dev_data/
