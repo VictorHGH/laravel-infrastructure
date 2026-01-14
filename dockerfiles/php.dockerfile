@@ -4,6 +4,7 @@ FROM ${PHP_BASE_IMAGE} AS base
 ARG INSTALL_XDEBUG=false
 ARG XDEBUG_VERSION=3.3.2
 ARG REDIS_PECL_VERSION=6.0.2
+ARG COMPOSER_IMAGE_TAG=2.7.2
 
 WORKDIR /var/www/html
 
@@ -51,7 +52,13 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD php-fpm -t || exit 1
 
 USER laravel
 
+FROM composer:${COMPOSER_IMAGE_TAG} AS vendor
+WORKDIR /app
+COPY ./src/composer.json ./src/composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
 FROM base AS app
 COPY --chown=laravel:laravel ./src /var/www/html
+COPY --chown=laravel:laravel --from=vendor /app/vendor /var/www/html/vendor
 WORKDIR /var/www/html
 USER laravel
