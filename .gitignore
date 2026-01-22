@@ -1,8 +1,39 @@
-src/*
-!src/.env.example
-!src/public/
-!src/public/.gitkeep
-!src/public/index.html
-mysql_data/
+# -------------------------
+# Infra / secretos
+# -------------------------
+.env
 mysql/.env
+
+# Datos persistentes (no versionar)
+mysql_data/
 mysql_dev_data/
+
+# -------------------------
+# Sistema / editor
+# -------------------------
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# -------------------------
+# Laravel app (en src/)
+# -------------------------
+# Variables de entorno
+src/.env
+src/.env.*
+!src/.env.example
+
+# Dependencias
+src/vendor/
+src/node_modules/
+
+# Cache / runtime
+src/storage/*
+!src/storage/.gitignore
+
+src/bootstrap/cache/*
+!src/bootstrap/cache/.gitignore
+
+# PHPUnit cache
+src/.phpunit.result.cache
