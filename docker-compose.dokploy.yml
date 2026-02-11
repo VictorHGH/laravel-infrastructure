@@ -12,8 +12,6 @@ services:
       dockerfile: dockerfiles/nginx.dockerfile
       args:
         NGINX_BASE_IMAGE: ${NGINX_BASE_IMAGE}
-    ports:
-      - "${WEB_PORT}:8080"
     depends_on:
       php:
         condition: service_started
