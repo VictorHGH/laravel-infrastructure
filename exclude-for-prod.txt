@@ -4,9 +4,8 @@
 .DS_Store
 *.log
 
-# Infra dev / plantilla (no necesario en prod)
-docker-compose.dev.yml
-docker-aliases.zsh
+# Infra local / plantilla (no necesario en prod)
+docker-compose.yml
 proyecto.txt
 generar_proyecto_txt.sh
 treecat.py
@@ -50,4 +49,3 @@ src/storage/
 src/tests/
 src/.phpunit.result.cache
 src/phpunit.xml
-
