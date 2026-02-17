@@ -2,6 +2,9 @@ networks:
   laravel-docker:
     name: "${PROJECT_NAME}-net"
 
+volumes:
+  node_modules:
+
 services:
 
   server:
@@ -46,6 +49,48 @@ services:
       - ./dockerfiles/php/opcache-dev.ini:/usr/local/etc/php/conf.d/opcache.ini:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - laravel-docker
+    restart: unless-stopped
+
+  scheduler:
+    user: ${UID:-1000}:${GID:-1000}
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      target: base
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        INSTALL_XDEBUG: "false"
+        PHP_BASE_IMAGE: ${PHP_BASE_IMAGE}
+        XDEBUG_VERSION: ${XDEBUG_VERSION}
+        REDIS_PECL_VERSION: ${REDIS_PECL_VERSION}
+        COMPOSER_IMAGE_TAG: ${COMPOSER_IMAGE_TAG}
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      php:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./src:/var/www/html:delegated
+    networks:
+      - laravel-docker
+    restart: unless-stopped
+
+  node:
+    image: node:20-alpine
+    working_dir: /app
+    command: ["sh", "-lc", "if [ -f package-lock.json ]; then if [ ! -d node_modules ] || [ ! -f node_modules/.package-lock.json ] || ! cmp -s package-lock.json node_modules/.package-lock.json; then npm ci && cp package-lock.json node_modules/.package-lock.json; fi; else if [ ! -d node_modules ]; then npm install; fi; fi; npm run dev -- --host 0.0.0.0 --port 5173"]
+    volumes:
+      - ./src:/app:delegated
+      - node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
     networks:
       - laravel-docker
     restart: unless-stopped

@@ -6,6 +6,52 @@ networks:
 
 services:
 
+  migrate:
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      target: app
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        INSTALL_XDEBUG: "false"
+        PHP_BASE_IMAGE: ${PHP_BASE_IMAGE}
+        XDEBUG_VERSION: ${XDEBUG_VERSION}
+        REDIS_PECL_VERSION: ${REDIS_PECL_VERSION}
+        COMPOSER_IMAGE_TAG: ${COMPOSER_IMAGE_TAG}
+    environment:
+      APP_NAME: ${APP_NAME}
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL}
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-warning}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: ${MYSQL_DATABASE}
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      CACHE_STORE: ${CACHE_STORE:-file}
+      SESSION_DRIVER: ${SESSION_DRIVER:-file}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
+      MAIL_MAILER: ${MAIL_MAILER}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+    command: ["sh", "-lc", "cd /var/www/html && php artisan migrate --force && php artisan optimize:clear && php artisan config:cache"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laravel-docker
+    restart: "no"
+
   server:
     build:
       context: .
@@ -41,27 +87,84 @@ services:
         COMPOSER_IMAGE_TAG: ${COMPOSER_IMAGE_TAG}
     environment:
       APP_NAME: ${APP_NAME}
-      APP_ENV: production
-      APP_DEBUG: "false"
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL}
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-warning}
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: "3306"
       DB_DATABASE: ${MYSQL_DATABASE}
       DB_USERNAME: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
-      APP_KEY: ${APP_KEY}
-      APP_URL: ${APP_URL}
-      CACHE_DRIVER: ${CACHE_DRIVER:-file}
+      CACHE_STORE: ${CACHE_STORE:-file}
       SESSION_DRIVER: ${SESSION_DRIVER:-file}
-      ADMIN1_NAME: ${ADMIN1_NAME}
-      ADMIN1_EMAIL: ${ADMIN1_EMAIL}
-      ADMIN1_PASSWORD: ${ADMIN1_PASSWORD}
-      ADMIN2_NAME: ${ADMIN2_NAME}
-      ADMIN2_EMAIL: ${ADMIN2_EMAIL}
-      ADMIN2_PASSWORD: ${ADMIN2_PASSWORD}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
+      MAIL_MAILER: ${MAIL_MAILER}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
     depends_on:
       mysql:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - laravel-docker
+    restart: unless-stopped
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      target: app
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        INSTALL_XDEBUG: "false"
+        PHP_BASE_IMAGE: ${PHP_BASE_IMAGE}
+        XDEBUG_VERSION: ${XDEBUG_VERSION}
+        REDIS_PECL_VERSION: ${REDIS_PECL_VERSION}
+        COMPOSER_IMAGE_TAG: ${COMPOSER_IMAGE_TAG}
+    environment:
+      APP_NAME: ${APP_NAME}
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL}
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-warning}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: ${MYSQL_DATABASE}
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      CACHE_STORE: ${CACHE_STORE:-file}
+      SESSION_DRIVER: ${SESSION_DRIVER:-file}
+      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
+      MAIL_MAILER: ${MAIL_MAILER}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      php:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - laravel-docker
     restart: unless-stopped
