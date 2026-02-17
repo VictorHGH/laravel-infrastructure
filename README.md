@@ -1,57 +1,64 @@
-# Plantilla de infraestructura Laravel
+# Laravel Infrastructure Template
 
-Este repo se usa como base para copiar/pegar infraestructura en nuevos proyectos Laravel.
+Plantilla reutilizable para montar infraestructura Docker en nuevos proyectos Laravel.
 
-## Requisitos
+## Que incluye
 
-- Docker + Docker Compose plugin.
+- `docker-compose.yml`: entorno local (nginx, php, mysql, scheduler, node, mailpit, phpmyadmin).
+- `docker-compose.dokploy.yml`: entorno de despliegue para Dokploy.
+- `docker-compose.dokploy.example.yml`: ejemplo comentado para referencia.
+- `.env.dokploy.example`: variables sugeridas para configurar Dokploy.
+- `CHECKLIST.md`: guia paso a paso para adoptar esta plantilla en un proyecto nuevo.
 
-## Archivos principales
+## Estructura esperada al copiar la plantilla
 
-- `docker-compose.yml`: entorno local (nginx + php + mysql + scheduler + node + mailpit + phpmyadmin).
-- `docker-compose.dokploy.yml`: entorno de deploy para Dokploy (server + php + scheduler + mysql + migrate one-shot).
-- `docker-compose.dokploy.example.yml`: referencia comentada del compose de Dokploy.
-- `.env.dokploy.example`: variables sugeridas para cargar en Dokploy.
-- `CHECKLIST.md`: pasos para copiar esta infraestructura a un proyecto nuevo.
-
-## Estructura esperada al reutilizar
-
-La plantilla asume que tu proyecto final tendrá algo como:
-
-- `src/` (app Laravel)
+- `src/` (aplicacion Laravel)
 - `dockerfiles/`
 - `nginx/default.conf`
 - `mysql/.env`
 
-## Servicios locales
+## Inicio rapido local
+
+1. Copia y ajusta `.env` (infra).
+2. Crea `mysql/.env` desde `mysql/.env.example`.
+3. Crea `src/.env` desde `src/.env.example`.
+4. Levanta servicios:
+
+```bash
+docker compose up -d --build
+```
+
+5. Verifica:
 
 - App: `http://localhost:${WEB_PORT:-8080}`
 - phpMyAdmin: `http://localhost:${PMA_PORT:-8090}`
-- Mailpit UI: `http://localhost:8025`
-- Mailpit SMTP: `mailpit:1025`
-- Vite dev server: `http://localhost:5173`
-- Scheduler Laravel: servicio `scheduler` (`php artisan schedule:work`)
+- Mailpit: `http://localhost:8025`
+- Vite: `http://localhost:5173`
 
-## Comandos locales
+## Comandos utiles
 
-- Levantar: `docker compose up -d --build`
-- Detener: `docker compose down`
-- Ver estado: `docker compose ps`
-- Logs: `docker compose logs -f server php node scheduler mysql`
+```bash
+docker compose ps
+docker compose logs -f server php node scheduler mysql
+docker compose exec php php artisan migrate
+docker compose exec -T php composer install
+```
 
-Laravel dentro de `php`:
+## Deploy con Dokploy
 
-- Artisan: `docker compose exec php php artisan <comando>`
-- Composer: `docker compose exec -T php composer <comando>`
+- Selecciona `docker-compose.dokploy.yml` como archivo de despliegue.
+- Carga variables de `.env.dokploy.example` en Dokploy.
+- Verifica `APP_KEY`, `APP_URL`, `MYSQL_*` y `MAIL_*` antes de publicar.
 
-## Variables de entorno
+Ejecucion manual equivalente:
 
-Infra (raiz del repo):
+```bash
+docker compose -f docker-compose.dokploy.yml up -d --build
+```
 
-- `PROJECT_NAME`, `WEB_PORT`, `PMA_PORT`, `UID`, `GID`
-- tags de imagen (`MYSQL_IMAGE_TAG`, `PHPMYADMIN_IMAGE_TAG`, `PHP_BASE_IMAGE`, etc.)
+## Correo en local
 
-Laravel (`src/.env`) para pruebas con Mailpit:
+En `src/.env` usa Mailpit:
 
 ```env
 MAIL_MAILER=smtp
@@ -60,26 +67,10 @@ MAIL_PORT=1025
 MAIL_USERNAME=null
 MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS=no-reply@tu-dominio.com
-MAIL_FROM_NAME="${APP_NAME}"
 ```
 
-## Deploy con Dokploy
+## Buenas practicas
 
-Dokploy debe usar `docker-compose.dokploy.yml`.
-
-Flujo recomendado:
-
-1. Cargar variables desde `.env.dokploy.example` en Dokploy.
-2. Verificar `APP_KEY`, credenciales de DB y SMTP reales.
-3. Desplegar usando `docker-compose.dokploy.yml`.
-
-Si necesitas correrlo manualmente:
-
-- Levantar: `docker compose -f docker-compose.dokploy.yml up -d --build`
-- Bajar: `docker compose -f docker-compose.dokploy.yml down`
-
-## Notas
-
-- No subir secretos: `mysql/.env`, `src/.env`.
-- `src/vendor` y `public/build` se generan durante el build de deploy.
+- No versionar secretos (`mysql/.env`, `src/.env`).
+- Mantener `exclude-for-prod.txt` y `.dockerignore` alineados al proyecto.
+- Revisar `CHECKLIST.md` antes de copiar esta base a un repo nuevo.
