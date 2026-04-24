@@ -118,18 +118,21 @@ services:
       - laravel-docker
 
   composer:
-    image: php:8.4-cli-alpine
+    image: composer:${COMPOSER_IMAGE_TAG}
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./src:/var/www/html
     working_dir: /var/www/html
-    entrypoint: ["sh", "-c", "install_deps() { apk add --no-cache git libzip libzip-dev zlib-dev icu icu-dev unzip libpng libjpeg-turbo libwebp freetype; }; install_deps && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && composer \"$@\"; } \"$@\""]
+    entrypoint: ["composer"]
 
   mysql:
     image: mysql:${MYSQL_IMAGE_TAG}
     restart: unless-stopped
-    env_file:
-      - ./mysql/.env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - ./mysql_dev_data:/var/lib/mysql
     networks:

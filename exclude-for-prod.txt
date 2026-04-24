@@ -22,7 +22,6 @@ mysql_dev_data/
 mysql_data/
 
 # Secretos (no subir)
-mysql/.env
 src/.env
 src/.env.local
 src/.env.production

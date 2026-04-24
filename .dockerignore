@@ -9,5 +9,4 @@ src/bootstrap/cache
 mysql_data
 mysql_dev_data
 .env
-mysql/.env
 *.log

@@ -2,7 +2,6 @@
 # Infra / secretos
 # -------------------------
 .env
-mysql/.env
 
 # Datos persistentes (no versionar)
 mysql_data/

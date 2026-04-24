@@ -15,14 +15,12 @@ Plantilla reutilizable para montar infraestructura Docker en nuevos proyectos La
 - `src/` (aplicacion Laravel)
 - `dockerfiles/`
 - `nginx/default.conf`
-- `mysql/.env`
 
 ## Inicio rapido local
 
 1. Copia y ajusta `.env` (infra).
-2. Crea `mysql/.env` desde `mysql/.env.example`.
-3. Crea `src/.env` desde `src/.env.example`.
-4. Levanta servicios:
+2. Crea `src/.env` desde `src/.env.example`.
+3. Levanta servicios:
 
 ```bash
 docker compose up -d --build
@@ -71,6 +69,6 @@ MAIL_ENCRYPTION=null
 
 ## Buenas practicas
 
-- No versionar secretos (`mysql/.env`, `src/.env`).
+- No versionar secretos (`.env`, `src/.env`).
 - Mantener `exclude-for-prod.txt` y `.dockerignore` alineados al proyecto.
 - Revisar `CHECKLIST.md` antes de copiar esta base a un repo nuevo.

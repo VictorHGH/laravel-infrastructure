@@ -4,14 +4,14 @@ Usa esta lista cuando copies esta infraestructura a un nuevo repositorio.
 
 ## 1) Copia de estructura base
 
-- [ ] Copiar al nuevo repo: `docker-compose.yml`, `docker-compose.dokploy.yml`, `dockerfiles/`, `nginx/`, `mysql/`, `.dockerignore`, `exclude-for-prod.txt`.
+- [ ] Copiar al nuevo repo: `docker-compose.yml`, `docker-compose.dokploy.yml`, `dockerfiles/`, `nginx/`, `.dockerignore`, `exclude-for-prod.txt`.
 - [ ] Verificar que la app Laravel exista en `src/`.
 - [ ] Confirmar que existan `src/package.json` (si usas Vite) y `src/.env.example`.
 
 ## 2) Ajustes de variables locales
 
 - [ ] Editar `.env` (infra) con `PROJECT_NAME`, `WEB_PORT`, `PMA_PORT`, `UID`, `GID`.
-- [ ] Crear `mysql/.env` desde `mysql/.env.example` y poner credenciales locales.
+- [ ] Definir credenciales MySQL en `/.env` (`MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`).
 - [ ] Crear `src/.env` desde `src/.env.example`.
 - [ ] En `src/.env`, para pruebas de correo local, usar `MAIL_HOST=mailpit` y `MAIL_PORT=1025`.
 
@@ -45,6 +45,6 @@ Usa esta lista cuando copies esta infraestructura a un nuevo repositorio.
 
 ## 7) Higiene de repositorio
 
-- [ ] No subir secretos (`mysql/.env`, `src/.env`).
+- [ ] No subir secretos (`.env`, `src/.env`).
 - [ ] Mantener `exclude-for-prod.txt` actualizado segun el proyecto.
 - [ ] Documentar en README cualquier variable extra especifica del proyecto.
